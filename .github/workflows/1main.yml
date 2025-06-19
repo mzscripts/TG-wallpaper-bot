@@ -1,0 +1,16 @@
+name: Tg trigger 1
+
+on:
+  schedule:
+    - cron: "0 3 * * *"   # 8:30 AM IST
+    - cron: "0 9 * * *"   # 2:30 PM IST
+    - cron: "0 15 * * *"  # 8:30 PM IST
+  workflow_dispatch:       # Manual trigger support
+
+jobs:
+  ping_render:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Call Render Deploy Hook
+        run: |
+          curl -X POST ${{ secrets.https://api.render.com/deploy/srv-d1a4392dbo4c73c48om0?key=1ieJ8FnpN7Q }}
