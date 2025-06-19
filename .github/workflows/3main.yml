@@ -1,0 +1,32 @@
+name: Run Tg Bot
+
+on:
+  schedule:
+    - cron: '0 8 * * *'  # Run at 8:00 AM UTC
+    - cron: '0 14 * * *' # Run at 2:00 PM UTC
+    - cron: '0 20 * * *' # Run at 8:00 PM UTC
+  workflow_dispatch:     # Allow manual triggering
+
+jobs:
+  run-bot:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run bot script
+        env:
+          BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
+          CHANNEL_USERNAME: ${{ secrets.CHANNEL_USERNAME }}
+        run: python daily_wallpaper_bot.py
