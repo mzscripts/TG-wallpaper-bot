@@ -2,9 +2,7 @@ name: Wallpaper Bot 4
 
 on:
   schedule:
-    - cron: '0 8 * * *'  # Run at 8:00 AM UTC (1:30 PM IST)
     - cron: '0 14 * * *' # Run at 2:00 PM UTC (7:30 PM IST)
-    - cron: '0 20 * * *' # Run at 8:00 PM UTC (1:30 AM IST next day)
   workflow_dispatch:     # Allow manual triggering
 
 jobs:
