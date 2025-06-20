@@ -88,11 +88,12 @@ async def main():
         # === Step 2: Load state ===
         caption_index, drop_counter = load_state()
         print(f"🔢 Loaded state: caption_index={caption_index}, drop_counter={drop_counter}")
+
         drop_counter += 1  # Increment drop counter
         caption = captions[caption_index]
-        caption_index = (caption_index + 1) % len(captions)  # Cycle through captions
+        next_caption_index = (caption_index + 1) % len(captions)  # Prepare next index
         caption_with_counter = f"#{drop_counter} {caption} "
-        print(f"Debug caption: {repr(caption_with_counter)}")
+        print(f"📝 Using caption: {caption_with_counter}")
 
         # === Step 3: Parse HTML and extract image URLs ===
         with open(HTML_FILE, 'r', encoding='utf-8') as f:
@@ -107,12 +108,18 @@ async def main():
         used_images = get_used_images()
         available_images = [url for url in wallpaper_links if url not in used_images]
         selected_images = available_images[:10]
-        print(f"ℹ️ Selected {len(selected_images)} images: {selected_images}")
         if not selected_images:
             print("❌ No new images available to post.")
             return
+        print(f"🖼️ Selected {len(selected_images)} images.")
 
-        # === Step 5: Download images ===
+        # === Step 5: Reload state just before posting to avoid duplication ===
+        latest_index, _ = load_state()
+        if latest_index != caption_index:
+            print(f"🛑 Detected duplicate run. Exiting before posting.")
+            return
+
+        # === Step 6: Download images ===
         media_group = []
         image_buffers = []
         for idx, image_url in enumerate(selected_images):
@@ -133,7 +140,7 @@ async def main():
             print("❌ No images were successfully downloaded.")
             return
 
-        # === Step 6: Post to Telegram ===
+        # === Step 7: Post to Telegram ===
         bot = Bot(token=BOT_TOKEN)
         try:
             await bot.send_media_group(chat_id=CHANNEL_USERNAME, media=media_group)
@@ -147,13 +154,11 @@ async def main():
             for buffer in image_buffers:
                 buffer.close()
 
-        # === Step 7: Save used images to Supabase ===
+        # === Step 8: Save used images and updated state ===
         save_used_images(selected_images)
+        save_state(next_caption_index, drop_counter)
 
-        # === Step 8: Save updated state ===
-        save_state(caption_index, drop_counter)
-
-        # === Step 9: Log it ===
+        # === Step 9: Log the post ===
         with open("post_log.txt", "a", encoding='utf-8') as log:
             for image_url in selected_images:
                 log.write(f"{datetime.now()}: Posted {image_url} with caption '{caption_with_counter}'\n")
