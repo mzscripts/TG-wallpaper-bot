@@ -1,7 +1,7 @@
 name: Wallpaper Bot 6
 on:
   schedule:
-    - cron: '0 8,20 * * *' # Run at 8:00 AM and 8:00 PM UTC (1:30 PM and 1:30 AM IST)
+    - cron: '30 22 * * *' # Run at 10:30 PM UTC (4:00 AM IST)
   workflow_dispatch: # Allow manual triggering
 concurrency:
   group: wallpaper-bot
